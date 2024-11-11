@@ -21,13 +21,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
-public class ExpungeData implements RequestHandler<Void, String> {
+public class ExpungeData implements RequestHandler<Void, Job> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Logger log = LoggerFactory.getLogger(ExpungeData.class);
 
     @Override
-    public String handleRequest(Void unused, Context context) {
-        String returnValue;
+    public Job handleRequest(Void unused, Context context) {
+        Job returnValue;
 
         log.info("ExpungeData Lambda - Started");
 
@@ -57,12 +57,11 @@ public class ExpungeData implements RequestHandler<Void, String> {
                         HttpResponse.BodyHandlers.ofString());
             }
 
-            Job job = objectMapper.readValue(response.body(), Job.class);
-            returnValue = job.getId();
+            returnValue = objectMapper.readValue(response.body(), Job.class);
 
             log.info("API Call Status: {}, Saner Job ID: {}",
                     response.statusCode(),
-                    job.getId()
+                    returnValue.getId()
             );
 
             log.info("ExpungeData Lambda - Completed");
