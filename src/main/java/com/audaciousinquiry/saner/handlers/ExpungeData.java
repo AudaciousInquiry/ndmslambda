@@ -1,9 +1,10 @@
-package com.audaciousinquiry.saner;
+package com.audaciousinquiry.saner.handlers;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.logging.LogLevel;
+import com.audaciousinquiry.saner.Utility;
 import com.audaciousinquiry.saner.config.Oauth2Config;
 import com.audaciousinquiry.saner.exceptions.SanerLambdaException;
 import com.audaciousinquiry.saner.model.Job;
@@ -26,7 +27,7 @@ public class ExpungeData implements RequestHandler<Void, String> {
     @Override
     public String handleRequest(Void unused, Context context) {
         LambdaLogger logger = context.getLogger();
-        String returnValue = "";
+        String returnValue;
 
         logger.log("ExpungeData Lambda - Started");
 
@@ -57,9 +58,10 @@ public class ExpungeData implements RequestHandler<Void, String> {
             }
 
             Job job = objectMapper.readValue(response.body(), Job.class);
+            returnValue = job.getId();
 
             logger.log(String.format(
-                    "Expunge Call Status: %d, Saner Job ID: %s",
+                    "API Call Status: %d, Saner Job ID: %s",
                     response.statusCode(),
                     job.getId()
                     )
@@ -68,22 +70,22 @@ public class ExpungeData implements RequestHandler<Void, String> {
             logger.log("ExpungeData Lambda - Completed");
         } catch (URISyntaxException ex) {
             logger.log(
-                    String.format("ExpungeData Lambda - URI Syntax Exception: %s", ex.getMessage()), LogLevel.ERROR
+                    String.format("URI Syntax Exception: %s", ex.getMessage()), LogLevel.ERROR
             );
             throw new SanerLambdaException(ex.getMessage());
         } catch (IOException ex) {
             logger.log(
-                    String.format("ExpungeData Lambda - IO Exception: %s", ex.getMessage()), LogLevel.ERROR
+                    String.format("IO Exception: %s", ex.getMessage()), LogLevel.ERROR
             );
             throw new SanerLambdaException(ex.getMessage());
         } catch (ParseException ex) {
             logger.log(
-                    String.format("ExpungeData Lambda - ParseException: %s", ex.getMessage()), LogLevel.ERROR
+                    String.format("ParseException: %s", ex.getMessage()), LogLevel.ERROR
             );
             throw new SanerLambdaException(ex.getMessage());
         } catch (InterruptedException ex) {
             logger.log(
-                    String.format("ExpungeData Lambda - InterruptedException: %s", ex.getMessage()), LogLevel.ERROR
+                    String.format("InterruptedException: %s", ex.getMessage()), LogLevel.ERROR
             );
             Thread.currentThread().interrupt();
             throw new SanerLambdaException(ex.getMessage());
