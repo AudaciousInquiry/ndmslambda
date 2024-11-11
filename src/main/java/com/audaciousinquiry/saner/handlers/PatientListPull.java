@@ -78,7 +78,7 @@ public class PatientListPull implements RequestHandler<Void, Job> {
             throw new SanerLambdaException(ex.getMessage());
         }
 
-        return new Job();
+        return returnValue;
     }
 
     private String buildUrl(String urlTemplate, String replacementValue) throws IllegalArgumentException {
