@@ -1,10 +1,10 @@
-package com.audaciousinquiry.saner.config;
+package com.audaciousinquiry.saner.records;
 
 import com.audaciousinquiry.saner.Utility;
 import org.json.JSONObject;
 import software.amazon.awssdk.regions.Region;
 
-public record Oauth2Config(
+public record Oauth2(
         String tokenUrl,
         String clientId,
         String clientSecret,
@@ -13,10 +13,10 @@ public record Oauth2Config(
         String scope,
         String credentialMode
 ) {
-    public static Oauth2Config fromAwsSecret(Region region, String secretName) {
+    public static Oauth2 fromAwsSecret(Region region, String secretName) {
         JSONObject secret = Utility.getAwsSecret(region, secretName);
 
-        return new Oauth2Config(
+        return new Oauth2(
                 secret.getString("token-url"),
                 secret.getString("client-id"),
                 secret.getString("client-secret"),

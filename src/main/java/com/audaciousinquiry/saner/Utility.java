@@ -1,7 +1,7 @@
 package com.audaciousinquiry.saner;
 
-import com.audaciousinquiry.saner.config.DateAdjustConfig;
-import com.audaciousinquiry.saner.config.Oauth2Config;
+import com.audaciousinquiry.saner.records.Oauth2;
+import com.audaciousinquiry.saner.records.DateAdjust;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -45,19 +45,19 @@ public class Utility {
         return new JSONObject(secret);
     }
 
-    public static AccessToken getOauth2AccessToken(Oauth2Config oauth2Config) throws URISyntaxException, IOException, ParseException {
+    public static AccessToken getOauth2AccessToken(Oauth2 oauth2) throws URISyntaxException, IOException, ParseException {
         TokenRequest request = new TokenRequest(
-                new URI(oauth2Config.tokenUrl()),
-                new ClientID(oauth2Config.clientId()),
-                new ResourceOwnerPasswordCredentialsGrant(oauth2Config.username(), new Secret(oauth2Config.password())),
-                new Scope(oauth2Config.scope())
+                new URI(oauth2.tokenUrl()),
+                new ClientID(oauth2.clientId()),
+                new ResourceOwnerPasswordCredentialsGrant(oauth2.username(), new Secret(oauth2.password())),
+                new Scope(oauth2.scope())
         );
 
         TokenResponse response = TokenResponse.parse(request.toHTTPRequest().send());
         return response.toSuccessResponse().getTokens().getAccessToken();
     }
 
-    public static String getPeriodStart(DateAdjustConfig dateAdjustConfig) {
+    public static String getPeriodStart(DateAdjust dateAdjustConfig) {
         Calendar calendar = getCalendarForPeriod(dateAdjustConfig.adjustDays(), dateAdjustConfig.adjustMonths());
 
         if (dateAdjustConfig.adjustEdge()) {
@@ -70,7 +70,7 @@ public class Utility {
         return new SimpleDateFormat(Constants.SIMPLE_DATE_MILLIS_FORMAT).format(calendar.getTime());
     }
 
-    public static String getPeriodEnd(DateAdjustConfig dateAdjustConfig) {
+    public static String getPeriodEnd(DateAdjust dateAdjustConfig) {
         Calendar calendar = getCalendarForPeriod(dateAdjustConfig.adjustDays(), dateAdjustConfig.adjustMonths());
 
         if (dateAdjustConfig.adjustEdge()) {

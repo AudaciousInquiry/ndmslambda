@@ -1,20 +1,20 @@
-package com.audaciousinquiry.saner.config;
+package com.audaciousinquiry.saner.records;
 
 import com.audaciousinquiry.saner.Utility;
 
-public record ScoopDataConfig(
+public record ScoopData(
         String periodStart,
         String periodEnd,
         String locationId,
         String measureId
 ) {
-    public static ScoopDataConfig fromEnvironment() {
+    public static ScoopData fromEnvironment() {
         String locationId = System.getenv("LOCATION_ID");
         String measureId = System.getenv("MEASURE_ID");
 
-        return new ScoopDataConfig(
-                Utility.getPeriodStart(DateAdjustConfig.fromEnvironmentStart()),
-                Utility.getPeriodEnd(DateAdjustConfig.fromEnvironmentEnd()),
+        return new ScoopData(
+                Utility.getPeriodStart(DateAdjust.fromEnvironmentStart()),
+                Utility.getPeriodEnd(DateAdjust.fromEnvironmentEnd()),
                 locationId,
                 measureId
         );

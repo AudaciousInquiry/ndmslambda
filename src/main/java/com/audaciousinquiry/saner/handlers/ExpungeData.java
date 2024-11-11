@@ -3,7 +3,7 @@ package com.audaciousinquiry.saner.handlers;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.audaciousinquiry.saner.Utility;
-import com.audaciousinquiry.saner.config.Oauth2Config;
+import com.audaciousinquiry.saner.records.Oauth2;
 import com.audaciousinquiry.saner.exceptions.SanerLambdaException;
 import com.audaciousinquiry.saner.models.Job;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,10 +36,10 @@ public class ExpungeData implements RequestHandler<Void, Job> {
             Region region = Region.of(System.getenv("AWS_REGION"));
             String apiUrl = System.getenv("API_ENDPOINT");
 
-            Oauth2Config oauth2Config = Oauth2Config.fromAwsSecret(region, secretName);
+            Oauth2 oauth2 = Oauth2.fromAwsSecret(region, secretName);
             log.info("Oauth2 Config Obtained From AWS Secret");
 
-            AccessToken accessToken = Utility.getOauth2AccessToken(oauth2Config);
+            AccessToken accessToken = Utility.getOauth2AccessToken(oauth2);
             log.info("Access Token Obtained");
 
             HttpResponse<String> response;

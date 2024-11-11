@@ -3,8 +3,7 @@ package com.audaciousinquiry.saner.handlers;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.audaciousinquiry.saner.Utility;
-import com.audaciousinquiry.saner.config.GenerateReportConfig;
-import com.audaciousinquiry.saner.config.Oauth2Config;
+import com.audaciousinquiry.saner.records.Oauth2;
 import com.audaciousinquiry.saner.exceptions.SanerLambdaException;
 import com.audaciousinquiry.saner.models.Job;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,14 +37,14 @@ public class GenerateReport implements RequestHandler<Void, Job>  {
             String authSecretName = System.getenv("API_AUTH_SECRET");
             String apiUrl = System.getenv("API_ENDPOINT");
 
-            GenerateReportConfig config = GenerateReportConfig.fromEnvironment();
+            com.audaciousinquiry.saner.records.GenerateReport config = com.audaciousinquiry.saner.records.GenerateReport.fromEnvironment();
 
             String apiCallBody = objectMapper.writeValueAsString(config);
 
-            Oauth2Config oauth2Config = Oauth2Config.fromAwsSecret(region, authSecretName);
+            Oauth2 oauth2 = Oauth2.fromAwsSecret(region, authSecretName);
             log.info("Oauth2 Config Obtained From AWS Secret");
 
-            AccessToken accessToken = Utility.getOauth2AccessToken(oauth2Config);
+            AccessToken accessToken = Utility.getOauth2AccessToken(oauth2);
             log.info("Access Token Obtained");
 
             log.info("Calling API to generate report for Location: {}, Measure: {}", config.locationId(), config.measureId());
