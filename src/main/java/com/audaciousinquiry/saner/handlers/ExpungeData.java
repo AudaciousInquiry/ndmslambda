@@ -34,7 +34,7 @@ public class ExpungeData implements RequestHandler<Void, Job> {
         try {
             String secretName = System.getenv("API_AUTH_SECRET");
             Region region = Region.of(System.getenv("AWS_REGION"));
-            String expungeApiUrl = System.getenv("API_ENDPOINT");
+            String apiUrl = System.getenv("API_ENDPOINT");
 
             Oauth2Config oauth2Config = Oauth2Config.fromAwsSecret(region, secretName);
             log.info("Oauth2 Config Obtained From AWS Secret");
@@ -48,7 +48,7 @@ public class ExpungeData implements RequestHandler<Void, Job> {
                     .build()) {
 
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(new URI(expungeApiUrl))
+                        .uri(new URI(apiUrl))
                         .header("Authorization", accessToken.toAuthorizationHeader())
                         .DELETE()
                         .build();
