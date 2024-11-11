@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.logging.LogLevel;
 import com.audaciousinquiry.saner.config.Oauth2Config;
+import com.audaciousinquiry.saner.exceptions.SanerLambdaException;
 import com.audaciousinquiry.saner.model.Job;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -69,19 +70,23 @@ public class ExpungeData implements RequestHandler<Void, String> {
             logger.log(
                     String.format("ExpungeData Lambda - URI Syntax Exception: %s", ex.getMessage()), LogLevel.ERROR
             );
+            throw new SanerLambdaException(ex.getMessage());
         } catch (IOException ex) {
             logger.log(
                     String.format("ExpungeData Lambda - IO Exception: %s", ex.getMessage()), LogLevel.ERROR
             );
+            throw new SanerLambdaException(ex.getMessage());
         } catch (ParseException ex) {
             logger.log(
                     String.format("ExpungeData Lambda - ParseException: %s", ex.getMessage()), LogLevel.ERROR
             );
+            throw new SanerLambdaException(ex.getMessage());
         } catch (InterruptedException ex) {
             logger.log(
                     String.format("ExpungeData Lambda - InterruptedException: %s", ex.getMessage()), LogLevel.ERROR
             );
             Thread.currentThread().interrupt();
+            throw new SanerLambdaException(ex.getMessage());
         }
 
         return returnValue;
