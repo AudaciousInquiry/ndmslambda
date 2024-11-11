@@ -1,5 +1,6 @@
 package com.audaciousinquiry.saner;
 
+import com.audaciousinquiry.saner.config.DateAdjustConfig;
 import com.audaciousinquiry.saner.config.Oauth2Config;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -16,6 +17,10 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 public class Utility {
     private Utility() {
@@ -51,4 +56,39 @@ public class Utility {
         TokenResponse response = TokenResponse.parse(request.toHTTPRequest().send());
         return response.toSuccessResponse().getTokens().getAccessToken();
     }
+
+    public static String getPeriodStart(DateAdjustConfig dateAdjustConfig) {
+        Calendar calendar = getCalendarForPeriod(dateAdjustConfig.adjustDays(), dateAdjustConfig.adjustMonths());
+
+        if (dateAdjustConfig.adjustEdge()) {
+            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+        }
+
+        return new SimpleDateFormat(Constants.SIMPLE_DATE_MILLIS_FORMAT).format(calendar.getTime());
+    }
+
+    public static String getPeriodEnd(DateAdjustConfig dateAdjustConfig) {
+        Calendar calendar = getCalendarForPeriod(dateAdjustConfig.adjustDays(), dateAdjustConfig.adjustMonths());
+
+        if (dateAdjustConfig.adjustEdge()) {
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 0);
+        }
+
+        return new SimpleDateFormat(Constants.SIMPLE_DATE_MILLIS_FORMAT).format(calendar.getTime());
+    }
+
+    private static Calendar getCalendarForPeriod(int adjustDays, int adjustMonths) {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        Calendar calendar = new GregorianCalendar();
+        calendar.add(Calendar.HOUR, (adjustDays * 24));
+        calendar.add(Calendar.MONTH, adjustMonths);
+        return calendar;
+    }
+
 }

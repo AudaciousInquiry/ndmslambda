@@ -1,4 +1,4 @@
-package com.audaciousinquiry.saner.model;
+package com.audaciousinquiry.saner.models;
 
 import lombok.Getter;
 import lombok.Setter;

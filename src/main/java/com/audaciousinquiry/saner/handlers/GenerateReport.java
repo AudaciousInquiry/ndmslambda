@@ -3,6 +3,7 @@ package com.audaciousinquiry.saner.handlers;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.audaciousinquiry.saner.Utility;
+import com.audaciousinquiry.saner.config.GenerateReportConfig;
 import com.audaciousinquiry.saner.config.Oauth2Config;
 import com.audaciousinquiry.saner.exceptions.SanerLambdaException;
 import com.audaciousinquiry.saner.models.Job;
@@ -21,26 +22,33 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
-public class ExpungeData implements RequestHandler<Void, Job> {
+public class GenerateReport implements RequestHandler<Void, Job>  {
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(ExpungeData.class);
+    private static final Logger log = LoggerFactory.getLogger(GenerateReport.class);
 
     @Override
     public Job handleRequest(Void unused, Context context) {
         Job returnValue;
 
-        log.info("ExpungeData Lambda - Started");
+        log.info("GenerateReport Lambda - Started");
 
         try {
-            String secretName = System.getenv("API_AUTH_SECRET");
+
             Region region = Region.of(System.getenv("AWS_REGION"));
+            String authSecretName = System.getenv("API_AUTH_SECRET");
             String apiUrl = System.getenv("API_ENDPOINT");
 
-            Oauth2Config oauth2Config = Oauth2Config.fromAwsSecret(region, secretName);
+            GenerateReportConfig config = GenerateReportConfig.fromEnvironment();
+
+            String apiCallBody = objectMapper.writeValueAsString(config);
+
+            Oauth2Config oauth2Config = Oauth2Config.fromAwsSecret(region, authSecretName);
             log.info("Oauth2 Config Obtained From AWS Secret");
 
             AccessToken accessToken = Utility.getOauth2AccessToken(oauth2Config);
             log.info("Access Token Obtained");
+
+            log.info("Calling API to generate report for Location: {}, Measure: {}", config.locationId(), config.measureId());
 
             HttpResponse<String> response;
             try (HttpClient httpClient = HttpClient.newBuilder()
@@ -50,13 +58,13 @@ public class ExpungeData implements RequestHandler<Void, Job> {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(new URI(apiUrl))
                         .header("Authorization", accessToken.toAuthorizationHeader())
-                        .DELETE()
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(apiCallBody))
                         .build();
 
                 response = httpClient.send(request,
                         HttpResponse.BodyHandlers.ofString());
             }
-
             returnValue = objectMapper.readValue(response.body(), Job.class);
 
             log.info("API Call Status: {}, Saner Job ID: {}",
@@ -64,10 +72,11 @@ public class ExpungeData implements RequestHandler<Void, Job> {
                     returnValue.getId()
             );
 
-            log.info("ExpungeData Lambda - Completed");
+            log.info("GenerateReport Lambda - Completed");
+
         } catch (URISyntaxException | IOException | ParseException ex) {
             throw new SanerLambdaException(ex.getMessage());
-        }   catch (InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new SanerLambdaException(ex.getMessage());
         }

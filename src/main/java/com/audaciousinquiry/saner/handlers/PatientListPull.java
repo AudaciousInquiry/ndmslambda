@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.audaciousinquiry.saner.Utility;
 import com.audaciousinquiry.saner.config.Oauth2Config;
 import com.audaciousinquiry.saner.exceptions.SanerLambdaException;
-import com.audaciousinquiry.saner.model.Job;
+import com.audaciousinquiry.saner.models.Job;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
