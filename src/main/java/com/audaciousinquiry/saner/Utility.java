@@ -83,6 +83,18 @@ public class Utility {
         return new SimpleDateFormat(Constants.SIMPLE_DATE_MILLIS_FORMAT).format(calendar.getTime());
     }
 
+    public static String templateReplacer(String stringTemplate, String placeholderName, String replacementValue) throws IllegalArgumentException {
+        if (stringTemplate == null || replacementValue == null) {
+            throw new IllegalArgumentException("Template and ReplacementValue must not be null");
+        }
+
+        if (!stringTemplate.contains(placeholderName)) {
+            throw new IllegalArgumentException("Template must contain '" + placeholderName + "'");
+        }
+
+        return stringTemplate.replace(placeholderName, replacementValue);
+    }
+
     private static Calendar getCalendarForPeriod(int adjustDays, int adjustMonths) {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         Calendar calendar = new GregorianCalendar();

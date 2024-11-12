@@ -4,9 +4,9 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.audaciousinquiry.saner.Constants;
 import com.audaciousinquiry.saner.Utility;
-import com.audaciousinquiry.saner.records.Oauth2;
 import com.audaciousinquiry.saner.exceptions.SanerLambdaException;
 import com.audaciousinquiry.saner.models.Job;
+import com.audaciousinquiry.saner.records.Oauth2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.token.AccessToken;
@@ -22,15 +22,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
-public class PatientListPull implements RequestHandler<Void, Job> {
+public class PublishReport implements RequestHandler<Void, Job> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(PatientListPull.class);
+    private static final Logger log = LoggerFactory.getLogger(PublishReport.class);
 
     @Override
     public Job handleRequest(Void unused, Context context) {
         Job returnValue;
 
-        log.info("PatientListPull Lambda - Started");
+        log.info("PublishReport Lambda - Started");
 
         try {
 
@@ -38,7 +38,10 @@ public class PatientListPull implements RequestHandler<Void, Job> {
             String secretName = System.getenv("API_AUTH_SECRET");
             String baseUrl = System.getenv("API_ENDPOINT");
             String locationId = System.getenv("LOCATION_ID");
+            String publishType = System.getenv("PUBLISH_TYPE");
+
             String apiUrl = Utility.templateReplacer(baseUrl, Constants.LOCATION_ID_PLACEHOLDER, locationId);
+            apiUrl = Utility.templateReplacer(apiUrl, Constants.PUBLISH_TYPE_PLACEHOLDER, publishType);
 
             Oauth2 oauth2 = Oauth2.fromAwsSecret(region, secretName);
             log.info("Oauth2 Config Obtained From AWS Secret");
@@ -46,7 +49,7 @@ public class PatientListPull implements RequestHandler<Void, Job> {
             AccessToken accessToken = Utility.getOauth2AccessToken(oauth2);
             log.info("Access Token Obtained");
 
-            log.info("Calling API to pull patient list for Location: {}", locationId);
+            log.info("Calling API to publish report for Location: {} via {}", locationId, publishType);
 
             HttpResponse<String> response;
             try (HttpClient httpClient = HttpClient.newBuilder()
@@ -69,7 +72,8 @@ public class PatientListPull implements RequestHandler<Void, Job> {
                     returnValue.getId()
             );
 
-            log.info("PatientListPull Lambda - Completed");
+            log.info("PublishReport Lambda - Completed");
+
 
         } catch (URISyntaxException | IOException | ParseException ex) {
             throw new SanerLambdaException(ex.getMessage());
@@ -79,5 +83,6 @@ public class PatientListPull implements RequestHandler<Void, Job> {
         }
 
         return returnValue;
+
     }
 }
